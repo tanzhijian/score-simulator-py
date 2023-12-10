@@ -1,4 +1,4 @@
-from score_simulator_py.models import Match
+from score_simulator_py.models import GameState, Match
 
 matches_data: dict[str, list[Match]] = {
     "2023-12-08": [
@@ -34,3 +34,11 @@ matches_data: dict[str, list[Match]] = {
 def test_match_model() -> None:
     match = matches_data["2023-12-08"][0]
     assert match["home"]["name"] == "Juventus"
+
+
+def test_game_state() -> None:
+    state = GameState()
+    state.home_score += 1
+    assert state.home_score == 1
+    state.reset()
+    assert state.home_score == 0
