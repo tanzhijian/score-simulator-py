@@ -93,11 +93,15 @@ class Game:
             frame = self.attack()
             state.home_shots += frame.home_shot
             state.home_xg += frame.home_xg
+            state.home_score += frame.home_score
             state.away_shots += frame.away_shot
             state.away_xg += frame.away_xg
+            state.away_score += frame.away_score
+
             if frame.home_score:
-                state.home_score += frame.home_score
                 state.home_goal_log += f"{minute}', "
+            elif frame.away_score:
+                state.away_goal_log += f"{minute}', "
 
             state.timing += 1
 
