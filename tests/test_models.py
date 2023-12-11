@@ -1,16 +1,33 @@
-from score_simulator_py.models import GameState
+import pytest
+
+from score_simulator_py.models import Game
 
 
-def test_game_state() -> None:
-    state = GameState()
-    assert state.home_score == 0
-    assert not state.played
+class TestGame:
+    @pytest.fixture(scope="class")
+    def game(self) -> Game:
+        return Game(
+            home_shots=195,
+            home_xg=22.7,
+            home_played=15,
+            away_shots=242,
+            away_xg=25.6,
+            away_played=15,
+        )
 
-    state.home_score += 1
-    state.played = True
-    assert state.home_score == 1
-    assert state.played
+    def test_generate_xg(self, game: Game) -> None:
+        xg = game.generate_xg(mu=0.1)
+        assert 0 <= xg <= 1
 
-    state.reset()
-    assert state.home_score == 0
-    assert state.played
+    def test_build_progress_bar(self, game: Game) -> None:
+        bar = game.build_progress_bar(50)
+        assert len(bar) == 10
+
+    def test_attack(self, game: Game) -> None:
+        state = game.attack()
+        assert state.home_shot >= 0
+
+    def test_play(self, game: Game) -> None:
+        state = game.play()
+        assert state.home_score >= 0
+        assert state.timing == 90
