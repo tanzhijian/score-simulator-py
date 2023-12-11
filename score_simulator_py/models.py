@@ -23,12 +23,12 @@ class GameState:
 
 @dataclass
 class AttackState:
-    home_shot: int = 0
-    home_score: int = 0
+    home_shot: bool = False
+    home_score: bool = False
     home_xg: float = 0
 
-    away_shot: int = 0
-    away_score: int = 0
+    away_shot: bool = False
+    away_score: bool = False
     away_xg: float = 0
 
 
@@ -74,15 +74,15 @@ class Game:
         state = AttackState()
         if random.random() < self.shot_prob_per_minute:
             if random.random() < self.home_shot_percentage:
-                state.home_shot = 1
+                state.home_shot = True
                 state.home_xg = self.generate_xg(self.home_xg_per_shot)
                 if random.random() < self.home_xg_per_shot:
-                    state.home_score = 1
+                    state.home_score = True
             else:
-                state.away_shot = 1
+                state.away_shot = True
                 state.away_xg = self.generate_xg(self.away_xg_per_shot)
                 if random.random() < self.away_xg_per_shot:
-                    state.away_score = 1
+                    state.away_score = True
         return state
 
     def play(self, fulltime: int = 90) -> GameState:

@@ -24,10 +24,10 @@ class TestGame:
         assert len(bar) == 10
 
     def test_attack(self, game: Game) -> None:
-        state = game.attack()
-        assert state.home_shot >= 0
+        frame = game.attack()
+        assert frame.home_shot >= 0
 
     def test_play(self, game: Game) -> None:
-        state = game.play()
-        assert state.home_score >= 0
-        assert state.timing == 90
+        stats = game.play()
+        assert stats.home_score >= 0
+        assert stats.timing == 90
