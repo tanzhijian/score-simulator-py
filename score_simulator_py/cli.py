@@ -3,7 +3,7 @@ from typing import Optional
 
 import typer
 
-from .api import get_data, matches_play
+from .api import Game, get_data
 
 app = typer.Typer()
 
@@ -17,7 +17,15 @@ def version() -> None:
 def play(date: Optional[str] = None) -> None:
     if date is None:
         date = datelib.today().strftime("%Y-%m-%d")
-    data = get_data()
-    results = matches_play(date, data)
-    for stats in results:
-        print(f"{stats.home_score} : {stats.away_score}")
+    matches = get_data()
+    for match in matches[date]:
+        game = Game(match)
+        result = game.play()
+
+        print(
+            (
+                f"{result.competition} - "
+                f"{result.home.name} {result.home.score} : "
+                f"{result.away.score} {result.away.name}"
+            )
+        )
