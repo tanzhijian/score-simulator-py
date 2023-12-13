@@ -1,6 +1,6 @@
-from score_simulator_py.types import Matches
+from score_simulator_py.types import MatchesType
 
-matches: Matches = {
+matches: MatchesType = {
     "2023-12-08": [
         {
             "name": "Juventus vs Napoli",

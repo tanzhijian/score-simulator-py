@@ -4,7 +4,7 @@ import random
 import httpx
 
 from .models import Frame, FrameTeam, Result, ResultTeam
-from .types import Match, Matches
+from .types import MatchesType, MatchType
 
 MATCHES_URL = (
     "https://raw.githubusercontent.com/"
@@ -12,14 +12,14 @@ MATCHES_URL = (
 )
 
 
-def get_data() -> Matches:
+def get_data() -> MatchesType:
     response = httpx.get(MATCHES_URL, proxies="http://127.0.0.1:7891")
-    json: Matches = response.json()
+    json: MatchesType = response.json()
     return json
 
 
 class Game:
-    def __init__(self, match: Match) -> None:
+    def __init__(self, match: MatchType) -> None:
         self.match = match
 
     def generate_xg(self, mu: float, sigma: float = 0.1) -> float:
