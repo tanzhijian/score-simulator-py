@@ -2,18 +2,14 @@ import pytest
 
 from score_simulator_py.models import Game
 
+from .data import matches
+
 
 class TestGame:
     @pytest.fixture(scope="class")
     def game(self) -> Game:
-        return Game(
-            home_shots=195,
-            home_xg=22.7,
-            home_played=15,
-            away_shots=242,
-            away_xg=25.6,
-            away_played=15,
-        )
+        match = matches["2023-12-08"][0]
+        return Game(match)
 
     def test_generate_xg(self, game: Game) -> None:
         xg = game.generate_xg(mu=0.1)
@@ -25,9 +21,9 @@ class TestGame:
 
     def test_attack(self, game: Game) -> None:
         frame = game.attack()
-        assert frame.home_shot >= 0
+        assert frame.home.shot >= 0
 
     def test_play(self, game: Game) -> None:
-        stats = game.play()
-        assert stats.home_score >= 0
-        assert stats.timing == 90
+        result = game.play()
+        assert result.home.score >= 0
+        assert result.timing == 90

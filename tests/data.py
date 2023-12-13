@@ -1,6 +1,6 @@
 from score_simulator_py.types import Matches
 
-matches_data: Matches = {
+matches: Matches = {
     "2023-12-08": [
         {
             "name": "Juventus vs Napoli",
@@ -29,8 +29,3 @@ matches_data: Matches = {
         },
     ]
 }
-
-
-def test_match() -> None:
-    match = matches_data["2023-12-08"][0]
-    assert match["home"]["name"] == "Juventus"

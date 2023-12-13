@@ -3,7 +3,7 @@ from httpx import Response
 
 from score_simulator_py.api import MATCHES_URL, get_data
 
-from .test_types import matches_data
+from .data import matches
 
 
 @respx.mock
