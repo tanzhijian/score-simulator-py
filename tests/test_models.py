@@ -1,5 +1,4 @@
 import os
-from datetime import date as datelib
 from pathlib import Path
 from typing import Any, Generator
 
@@ -8,17 +7,19 @@ import respx
 from httpx import Response
 
 from score_simulator_py.models import MATCHES_URL, Matches
+from score_simulator_py.types import MatchesType
 
 from .data import matches as matches_data
 
 
 class TestMatches:
     @pytest.fixture(scope="class")
-    def matches(self) -> Matches:
-        tmp_path = str(Path(Path.cwd(), "tests/tmp"))
-        mt = Matches()
-        mt.path = tmp_path
-        return mt
+    def mock_route(self) -> Generator[respx.Route, Any, None]:
+        with respx.mock:
+            route = respx.get(MATCHES_URL).mock(
+                return_value=Response(200, json=matches_data)
+            )
+            yield route
 
     @pytest.fixture
     def clean(self, matches: Matches) -> Generator[None, Any, None]:
@@ -27,14 +28,6 @@ class TestMatches:
             matches.file.unlink()
         if matches.directory.exists():
             matches.directory.rmdir()
-
-    @pytest.fixture
-    def mock_route(self) -> Generator[respx.Route, Any, None]:
-        with respx.mock:
-            route = respx.get(MATCHES_URL).mock(
-                return_value=Response(200, json=matches_data)
-            )
-            yield route
 
     def test_default_path(self) -> None:
         matches = Matches()
@@ -103,13 +96,14 @@ class TestMatches:
         with pytest.raises(KeyError):
             data["2023-12-09"]
 
-    def test_get_today(self, matches: Matches, clean: Any) -> None:
-        today = datelib.today().strftime("%Y-%m-%d")
-        today_matches_data = matches_data | {today: []}
+    def test_get_today(
+        self, matches: Matches, today_matches_data: MatchesType, clean: Any
+    ) -> None:
         matches.save(today_matches_data)
 
         data = matches.get()
         match = data["2023-12-08"][0]
         assert match["home"]["name"] == "Juventus"
 
+        today = list(today_matches_data.keys())[1]
         assert len(data[today]) == 0
