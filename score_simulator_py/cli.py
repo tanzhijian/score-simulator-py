@@ -3,7 +3,8 @@ from typing import Optional
 
 import typer
 
-from .api import Game, get_data
+from .api import Game
+from .models import Matches
 
 app = typer.Typer()
 
@@ -17,8 +18,8 @@ def version() -> None:
 def play(date: Optional[str] = None) -> None:
     if date is None:
         date = datelib.today().strftime("%Y-%m-%d")
-    matches = get_data()
-    for match in matches[date]:
+    matches = Matches()
+    for match in matches.select(date):
         game = Game(match)
         result = game.play()
 

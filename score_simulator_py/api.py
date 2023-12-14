@@ -1,21 +1,8 @@
 import math
 import random
 
-import httpx
-
 from .models import Frame, FrameTeam, Result, ResultTeam
-from .types import MatchesType, MatchType
-
-MATCHES_URL = (
-    "https://raw.githubusercontent.com/"
-    "tanzhijian/score-simulator-data/release/matches.json"
-)
-
-
-def get_data() -> MatchesType:
-    response = httpx.get(MATCHES_URL, proxies="http://127.0.0.1:7891")
-    json: MatchesType = response.json()
-    return json
+from .types import MatchType
 
 
 class Game:
