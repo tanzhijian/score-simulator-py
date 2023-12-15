@@ -1,5 +1,6 @@
 import json
-from dataclasses import dataclass
+from collections import Counter
+from dataclasses import dataclass, field
 from datetime import date as datelib
 from pathlib import Path
 
@@ -20,7 +21,20 @@ class ResultTeam:
     shots: int = 0
     score: int = 0
     xg: float = 0
-    goal_log: str = ""
+    goal_minutes: list[int] = field(default_factory=list)
+
+    def reset(self) -> None:
+        self.shots = 0
+        self.score = 0
+        self.xg = 0
+        self.goal_minutes.clear()
+
+    @property
+    def goal_log(self) -> str:
+        log = ""
+        for minute in self.goal_minutes:
+            log += f"{minute}', "
+        return log
 
 
 @dataclass
@@ -29,9 +43,68 @@ class Result:
     away: ResultTeam
     competition: str
     timing: int = 0
-    shots_progress_bar: str = ""
-    xg_progress_bar: str = ""
     played: bool = False
+
+    def reset(self) -> None:
+        self.home.reset()
+        self.away.reset()
+        self.timing = 0
+        self.played = False
+
+    def add(self, result: "Result") -> None:
+        self.home.shots += result.home.shots
+        self.home.score += result.home.shots
+        self.home.xg += result.home.xg
+        self.home.goal_minutes += result.home.goal_minutes
+
+        self.away.shots += result.away.shots
+        self.away.score += result.away.shots
+        self.away.xg += result.away.xg
+        self.away.goal_minutes += result.away.goal_minutes
+
+    def _top_goal_periods(self, goal_minutes: list[int], n: int) -> list[int]:
+        # 计算每个时段的进球次数
+        goal_counts = Counter(goal_minutes)
+        # 选择前 n 个进球次数最多的时段
+        top_periods = [period for period, _ in goal_counts.most_common(n)]
+        return sorted(top_periods)
+
+    def average(self, divisor: int) -> None:
+        self.home.shots //= divisor
+        self.home.score //= divisor
+        self.home.xg /= divisor
+        self.home.goal_minutes = self._top_goal_periods(
+            self.home.goal_minutes, self.home.score
+        )
+
+        self.away.shots //= divisor
+        self.away.score //= divisor
+        self.away.xg /= divisor
+        self.away.goal_minutes = self._top_goal_periods(
+            self.away.goal_minutes, self.away.score
+        )
+
+    def _build_progress_bar(self, progress: int | float) -> str:
+        bar = ""
+        for i in range(1, 11):
+            bar += "█" if progress >= i * 10 else "░"
+        return bar
+
+    @property
+    def shots_progress_bar(self) -> str:
+        if (all_shots := self.home.shots + self.away.shots) > 0:
+            shots_progress = self.home.shots / all_shots * 100
+        else:
+            shots_progress = 50
+        return self._build_progress_bar(shots_progress)
+
+    @property
+    def xg_progress_bar(self) -> str:
+        if (all_xg := self.home.xg + self.away.xg) > 0:
+            xg_progress = self.home.xg / all_xg * 100
+        else:
+            xg_progress = 50
+        return self._build_progress_bar(xg_progress)
 
 
 @dataclass

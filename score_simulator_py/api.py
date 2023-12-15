@@ -24,12 +24,6 @@ class Game:
 
         return xg
 
-    def build_progress_bar(self, progress: int | float) -> str:
-        bar = ""
-        for i in range(1, 11):
-            bar += "█" if progress >= i * 10 else "░"
-        return bar
-
     def attack(self) -> Frame:
         frame = Frame(home=FrameTeam(), away=FrameTeam())
 
@@ -70,7 +64,6 @@ class Game:
             away=ResultTeam(name=self.match["away"]["name"]),
             competition=self.match["competition"]["name"],
         )
-        result.played = True
 
         for minute in range(fulltime):
             frame = self.attack()
@@ -82,18 +75,11 @@ class Game:
             result.away.score += frame.away.score
 
             if frame.home.score:
-                result.home.goal_log += f"{minute}', "
+                result.home.goal_minutes.append(minute)
             elif frame.away.score:
-                result.away.goal_log += f"{minute}', "
+                result.away.goal_minutes.append(minute)
 
-            result.timing += 1
-
-        if (all_shots := result.home.shots + result.away.shots) > 0:
-            shots_progress = result.home.shots / all_shots * 100
-            result.shots_progress_bar = self.build_progress_bar(shots_progress)
-
-        if (all_xg := result.home.xg + result.away.xg) > 0:
-            xg_progress = result.home.xg / all_xg * 100
-            result.xg_progress_bar = self.build_progress_bar(xg_progress)
+        result.timing = fulltime
+        result.played = True
 
         return result

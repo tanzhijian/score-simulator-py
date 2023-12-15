@@ -15,10 +15,6 @@ class TestGame:
         xg = game.generate_xg(mu=0.1)
         assert 0 <= xg <= 1
 
-    def test_build_progress_bar(self, game: Game) -> None:
-        bar = game.build_progress_bar(50)
-        assert len(bar) == 10
-
     def test_attack(self, game: Game) -> None:
         frame = game.attack()
         assert frame.home.shot >= 0

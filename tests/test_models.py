@@ -6,10 +6,95 @@ import pytest
 import respx
 from httpx import Response
 
-from score_simulator_py.models import MATCHES_URL, Matches
+from score_simulator_py.models import MATCHES_URL, Matches, Result, ResultTeam
 from score_simulator_py.types import MatchesType
 
 from .data import matches as matches_data
+
+
+def test_result_team() -> None:
+    team = ResultTeam(name="Arsenal")
+    team.goal_minutes.append(9)
+    assert team.goal_log == "9', "
+
+    team.reset()
+    assert len(team.goal_minutes) == 0
+
+
+class TestResult:
+    @pytest.fixture(scope="class")
+    def result(self) -> Result:
+        home = ResultTeam("Arsenal")
+        away = ResultTeam("Man City")
+        return Result(home=home, away=away, competition="Premier League")
+
+    def test_reset(self, result: Result) -> None:
+        result.home.score = 1
+        result.away.goal_minutes.append(8)
+        result.reset()
+        assert result.home.score == 0
+        assert len(result.away.goal_minutes) == 0
+
+    def test_build_progress_bar(self, result: Result) -> None:
+        bar = result._build_progress_bar(50)
+        assert len(bar) == 10
+
+    def test_shots_progress_bar(self, result: Result) -> None:
+        result.home.shots = 6
+        result.away.shots = 4
+        bar = result.shots_progress_bar
+        assert len(bar) == 10
+        assert bar.count("█") == 6
+        result.home.shots = 0
+        result.away.shots = 0
+
+    def test_xg_progress_bar(self, result: Result) -> None:
+        result.home.xg = 0.6
+        result.away.xg = 0.4
+        bar = result.xg_progress_bar
+        assert len(bar) == 10
+        assert bar.count("█") == 6
+        result.home.xg = 0
+        result.away.xg = 0
+
+    def test_top_goal_periods(self, result: Result) -> None:
+        goal_minutes = [20, 20, 89, 89, 47, 47, 8, 78]
+        top_periods = result._top_goal_periods(goal_minutes, 3)
+        assert top_periods == [20, 47, 89]
+
+    def test_add(self, result: Result) -> None:
+        result_2 = Result(
+            home=ResultTeam(
+                name="Arsenal", shots=6, score=1, xg=0.6, goal_minutes=[89]
+            ),
+            away=ResultTeam(name="Man City", shots=4, xg=0.4),
+            competition="Premier League",
+        )
+        result.add(result_2)
+        assert result.home.shots == 6
+        assert int(result.away.xg * 10) == 4
+        assert result.home.goal_minutes[0] == 89
+
+        result.reset()
+
+    def test_average(self, result: Result) -> None:
+        result.home.shots = 10
+        result.home.xg = 1.2
+        result.home.score = 2
+        result.home.goal_minutes += [2, 89]
+        result.away.shots = 8
+        result.away.xg = 0.8
+        result.away.score = 1
+        result.away.goal_minutes += [47]
+
+        result.average(2)
+        assert result.home.shots == 5
+        assert int(result.away.xg * 10) == 4
+        assert result.away.score == 0
+        assert len(result.home.goal_minutes) == 1
+        assert len(result.away.goal_minutes) == 0
+
+        result.reset()
 
 
 class TestMatches:
