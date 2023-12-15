@@ -30,3 +30,25 @@ def play(date: Optional[str] = None) -> None:
                 f"{result.away.score} {result.away.name}"
             )
         )
+
+
+@app.command(name="play_100")
+def play_100(date: Optional[str] = None, steps: int = 100) -> None:
+    if date is None:
+        date = datelib.today().strftime("%Y-%m-%d")
+    matches = Matches()
+    for match in matches.select(date):
+        game = Game(match)
+        result = game.play_100(steps=steps)
+
+        print(
+            (
+                f"{result.competition} - "
+                f"{result.home.name} {result.home.score} : "
+                f"{result.away.score} {result.away.name}"
+            )
+        )
+
+
+if __name__ == "__main__":
+    app()

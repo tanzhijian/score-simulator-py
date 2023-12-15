@@ -23,3 +23,9 @@ class TestGame:
         result = game.play()
         assert result.home.score >= 0
         assert result.timing == 90
+
+    def test_play_100(self, game: Game) -> None:
+        result = game.play_100(steps=2)
+        assert result.home.score >= 0
+        assert result.timing == 90
+        assert result.played

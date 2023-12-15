@@ -49,13 +49,13 @@ class Result:
         home = ResultTeam(
             name=self.home.name,
             shots=self.home.shots + result.home.shots,
-            score=self.home.score + result.home.shots,
+            score=self.home.score + result.home.score,
             goal_minutes=self.home.goal_minutes + result.home.goal_minutes,
         )
         away = ResultTeam(
             name=self.away.name,
             shots=self.away.shots + result.away.shots,
-            score=self.away.score + result.away.shots,
+            score=self.away.score + result.away.score,
             xg=self.away.xg + result.away.xg,
             goal_minutes=self.away.goal_minutes + result.away.goal_minutes,
         )

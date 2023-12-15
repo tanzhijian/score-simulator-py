@@ -83,3 +83,17 @@ class Game:
         result.played = True
 
         return result
+
+    def play_100(self, fulltime: int = 90, steps: int = 100) -> Result:
+        results = [self.play(fulltime) for _ in range(steps)]
+        result = sum(
+            results,
+            Result(
+                home=ResultTeam(name=self.match["home"]["name"]),
+                away=ResultTeam(name=self.match["away"]["name"]),
+                competition=self.match["competition"]["name"],
+                timing=fulltime,
+                played=True,
+            ),
+        )
+        return result / steps

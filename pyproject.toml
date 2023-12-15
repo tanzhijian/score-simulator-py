@@ -32,3 +32,6 @@ strict = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests",]
+
+[tool.poetry.scripts]
+ssp = "score_simulator_py:app"
