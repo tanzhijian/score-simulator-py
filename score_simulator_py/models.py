@@ -23,18 +23,18 @@ class ResultTeam:
     xg: float = 0
     goal_minutes: list[int] = field(default_factory=list)
 
-    def reset(self) -> None:
-        self.shots = 0
-        self.score = 0
-        self.xg = 0
-        self.goal_minutes.clear()
-
     @property
     def goal_log(self) -> str:
         log = ""
         for minute in self.goal_minutes:
             log += f"{minute}', "
         return log
+
+    def reset(self) -> None:
+        self.shots = 0
+        self.score = 0
+        self.xg = 0
+        self.goal_minutes.clear()
 
 
 @dataclass
@@ -45,22 +45,62 @@ class Result:
     timing: int = 0
     played: bool = False
 
-    def reset(self) -> None:
-        self.home.reset()
-        self.away.reset()
-        self.timing = 0
-        self.played = False
+    def __add__(self, result: "Result") -> "Result":
+        home = ResultTeam(
+            name=self.home.name,
+            shots=self.home.shots + result.home.shots,
+            score=self.home.score + result.home.shots,
+            goal_minutes=self.home.goal_minutes + result.home.goal_minutes,
+        )
+        away = ResultTeam(
+            name=self.away.name,
+            shots=self.away.shots + result.away.shots,
+            score=self.away.score + result.away.shots,
+            xg=self.away.xg + result.away.xg,
+            goal_minutes=self.away.goal_minutes + result.away.goal_minutes,
+        )
+        return Result(
+            home=home,
+            away=away,
+            competition=self.competition,
+            timing=self.timing,
+            played=self.played,
+        )
 
-    def add(self, result: "Result") -> None:
-        self.home.shots += result.home.shots
-        self.home.score += result.home.shots
-        self.home.xg += result.home.xg
-        self.home.goal_minutes += result.home.goal_minutes
+    def __truediv__(self, divisor: int) -> "Result":
+        return self._divide(divisor)
 
-        self.away.shots += result.away.shots
-        self.away.score += result.away.shots
-        self.away.xg += result.away.xg
-        self.away.goal_minutes += result.away.goal_minutes
+    def __floordiv__(self, divisor: int) -> "Result":
+        return self._divide(divisor)
+
+    def _divide(self, divisor: int) -> "Result":
+        home_score = self.home.score // divisor
+        home = ResultTeam(
+            name=self.home.name,
+            shots=self.home.shots // divisor,
+            score=home_score,
+            xg=self.home.xg / divisor,
+            goal_minutes=self._top_goal_periods(
+                self.home.goal_minutes, home_score
+            ),
+        )
+        away_score = self.away.score // divisor
+        away = ResultTeam(
+            name=self.away.name,
+            shots=self.away.shots // divisor,
+            score=away_score,
+            xg=self.away.xg / divisor,
+            goal_minutes=self._top_goal_periods(
+                self.away.goal_minutes, away_score
+            ),
+        )
+        return Result(
+            home=home,
+            away=away,
+            competition=self.competition,
+            timing=self.timing,
+            played=self.played,
+        )
 
     def _top_goal_periods(self, goal_minutes: list[int], n: int) -> list[int]:
         # 计算每个时段的进球次数
@@ -68,21 +108,6 @@ class Result:
         # 选择前 n 个进球次数最多的时段
         top_periods = [period for period, _ in goal_counts.most_common(n)]
         return sorted(top_periods)
-
-    def average(self, divisor: int) -> None:
-        self.home.shots //= divisor
-        self.home.score //= divisor
-        self.home.xg /= divisor
-        self.home.goal_minutes = self._top_goal_periods(
-            self.home.goal_minutes, self.home.score
-        )
-
-        self.away.shots //= divisor
-        self.away.score //= divisor
-        self.away.xg /= divisor
-        self.away.goal_minutes = self._top_goal_periods(
-            self.away.goal_minutes, self.away.score
-        )
 
     def _build_progress_bar(self, progress: int | float) -> str:
         bar = ""
@@ -105,6 +130,12 @@ class Result:
         else:
             xg_progress = 50
         return self._build_progress_bar(xg_progress)
+
+    def reset(self) -> None:
+        self.home.reset()
+        self.away.reset()
+        self.timing = 0
+        self.played = False
 
 
 @dataclass

@@ -21,41 +21,40 @@ def test_result_team() -> None:
     assert len(team.goal_minutes) == 0
 
 
+def test_result_reset() -> None:
+    result = Result(
+        home=ResultTeam(name="a", shots=1),
+        away=ResultTeam(name="b", goal_minutes=[1]),
+        competition="c",
+    )
+    result.reset()
+    assert result.home.shots == 0
+    assert len(result.away.goal_minutes) == 0
+
+
 class TestResult:
     @pytest.fixture(scope="class")
     def result(self) -> Result:
-        home = ResultTeam("Arsenal")
-        away = ResultTeam("Man City")
-        return Result(home=home, away=away, competition="Premier League")
+        home = ResultTeam(
+            "Arsenal", shots=20, xg=1.2, score=2, goal_minutes=[2, 89]
+        )
+        away = ResultTeam(
+            "Man City", shots=12, xg=0.8, score=1, goal_minutes=[47]
+        )
+        r = Result(home=home, away=away, competition="Premier League")
 
-    def test_reset(self, result: Result) -> None:
-        result.home.score = 1
-        result.away.goal_minutes.append(8)
-        result.reset()
-        assert result.home.score == 0
-        assert len(result.away.goal_minutes) == 0
+        return r
 
     def test_build_progress_bar(self, result: Result) -> None:
         bar = result._build_progress_bar(50)
         assert len(bar) == 10
+        assert bar.count("█") == 5
 
     def test_shots_progress_bar(self, result: Result) -> None:
-        result.home.shots = 6
-        result.away.shots = 4
-        bar = result.shots_progress_bar
-        assert len(bar) == 10
-        assert bar.count("█") == 6
-        result.home.shots = 0
-        result.away.shots = 0
+        assert result.shots_progress_bar.count("█") == 6
 
     def test_xg_progress_bar(self, result: Result) -> None:
-        result.home.xg = 0.6
-        result.away.xg = 0.4
-        bar = result.xg_progress_bar
-        assert len(bar) == 10
-        assert bar.count("█") == 6
-        result.home.xg = 0
-        result.away.xg = 0
+        assert result.xg_progress_bar.count("█") == 6
 
     def test_top_goal_periods(self, result: Result) -> None:
         goal_minutes = [20, 20, 89, 89, 47, 47, 8, 78]
@@ -70,31 +69,32 @@ class TestResult:
             away=ResultTeam(name="Man City", shots=4, xg=0.4),
             competition="Premier League",
         )
-        result.add(result_2)
-        assert result.home.shots == 6
-        assert int(result.away.xg * 10) == 4
-        assert result.home.goal_minutes[0] == 89
+        new_result = result + result_2
+        assert new_result.home.shots == 26
+        assert int(new_result.away.xg * 10) == 12
+        assert new_result.home.goal_minutes == [2, 89, 89]
 
-        result.reset()
+        new_result = sum(
+            [result, result_2],
+            Result(
+                home=ResultTeam(name="Arsenal"),
+                away=ResultTeam(name="Man City"),
+                competition="Premier League",
+            ),
+        )
+        assert new_result.home.shots == 26
 
-    def test_average(self, result: Result) -> None:
-        result.home.shots = 10
-        result.home.xg = 1.2
-        result.home.score = 2
-        result.home.goal_minutes += [2, 89]
-        result.away.shots = 8
-        result.away.xg = 0.8
-        result.away.score = 1
-        result.away.goal_minutes += [47]
+    def test_divide(self, result: Result) -> None:
+        divide_result = result._divide(2)
+        assert divide_result.home.shots == 10
+        assert int(divide_result.away.xg * 10) == 4
+        assert divide_result.away.score == 0
+        assert len(divide_result.home.goal_minutes) == 1
+        assert len(divide_result.away.goal_minutes) == 0
 
-        result.average(2)
-        assert result.home.shots == 5
-        assert int(result.away.xg * 10) == 4
-        assert result.away.score == 0
-        assert len(result.home.goal_minutes) == 1
-        assert len(result.away.goal_minutes) == 0
-
-        result.reset()
+        truediv_result = result / 2
+        floordiv_result = result // 2
+        assert truediv_result.home.shots == floordiv_result.home.shots
 
 
 class TestMatches:
