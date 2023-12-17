@@ -7,7 +7,7 @@ import respx
 from httpx import Response
 
 from score_simulator_py.models import MATCHES_URL, Matches, Result, ResultTeam
-from score_simulator_py.types import MatchesType
+from score_simulator_py.types import MatchesTypes
 
 from .data import matches as matches_data
 
@@ -72,6 +72,7 @@ class TestResult:
         new_result = result + result_2
         assert new_result.home.shots == 26
         assert int(new_result.away.xg * 10) == 12
+        assert new_result.home.score == 3
         assert new_result.home.goal_minutes == [2, 89, 89]
 
         new_result = sum(
@@ -182,7 +183,7 @@ class TestMatches:
             data["2023-12-09"]
 
     def test_get_today(
-        self, matches: Matches, today_matches_data: MatchesType, clean: Any
+        self, matches: Matches, today_matches_data: MatchesTypes, clean: Any
     ) -> None:
         matches.save(today_matches_data)
 

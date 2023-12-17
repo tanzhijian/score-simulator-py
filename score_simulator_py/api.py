@@ -2,11 +2,11 @@ import math
 import random
 
 from .models import Frame, FrameTeam, Result, ResultTeam
-from .types import MatchType
+from .types import MatchTypes
 
 
 class Game:
-    def __init__(self, match: MatchType) -> None:
+    def __init__(self, match: MatchTypes) -> None:
         self.match = match
 
     def generate_xg(self, mu: float, sigma: float = 0.1) -> float:

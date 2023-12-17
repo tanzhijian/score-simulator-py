@@ -7,7 +7,7 @@ from pathlib import Path
 import httpx
 from decouple import config
 
-from .types import MatchesType, MatchType
+from .types import MatchesTypes, MatchTypes
 
 MATCHES_URL = (
     "https://raw.githubusercontent.com/"
@@ -183,24 +183,24 @@ class Matches:
     def file(self) -> Path:
         return Path(self.directory, "matches.json")
 
-    def fetch(self) -> MatchesType:
+    def fetch(self) -> MatchesTypes:
         proxy: str | None = config("SCORE_SIMULATOR_PROXY", default=None)
         response = httpx.get(MATCHES_URL, proxies=proxy)
         response.raise_for_status()
-        data: MatchesType = response.json()
+        data: MatchesTypes = response.json()
         return data
 
-    def read(self) -> MatchesType:
+    def read(self) -> MatchesTypes:
         with open(self.file) as f:
-            data: MatchesType = json.load(f)
+            data: MatchesTypes = json.load(f)
         return data
 
-    def save(self, data: MatchesType) -> None:
+    def save(self, data: MatchesTypes) -> None:
         self.mkdir()
         with open(self.file, "w") as f:
             f.write(json.dumps(data, indent=2, ensure_ascii=False))
 
-    def get(self) -> MatchesType:
+    def get(self) -> MatchesTypes:
         self.mkdir()
         if self.file.exists():
             data = self.read()
@@ -215,6 +215,6 @@ class Matches:
             self.save(data)
         return data
 
-    def select(self, date: str) -> list[MatchType]:
+    def select(self, date: str) -> list[MatchTypes]:
         data = self.get()
         return data[date]

@@ -1,12 +1,12 @@
 from typing import TypedDict
 
 
-class CompetitionType(TypedDict):
+class CompetitionTypes(TypedDict):
     name: str
     logo: str
 
 
-class TeamType(TypedDict):
+class TeamTypes(TypedDict):
     name: str
     logo: str
     shots: int
@@ -15,13 +15,13 @@ class TeamType(TypedDict):
     played: int
 
 
-class MatchType(TypedDict):
+class MatchTypes(TypedDict):
     name: str
     utc_time: str
     finished: bool
-    competition: CompetitionType
-    home: TeamType
-    away: TeamType
+    competition: CompetitionTypes
+    home: TeamTypes
+    away: TeamTypes
 
 
-MatchesType = dict[str, list[MatchType]]
+MatchesTypes = dict[str, list[MatchTypes]]

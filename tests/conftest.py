@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 from score_simulator_py.models import Matches
-from score_simulator_py.types import MatchesType
+from score_simulator_py.types import MatchesTypes
 
 from .data import matches as matches_data
 
@@ -18,6 +18,6 @@ def matches() -> Matches:
 
 
 @pytest.fixture(scope="session")
-def today_matches_data() -> MatchesType:
+def today_matches_data() -> MatchesTypes:
     today = datelib.today().strftime("%Y-%m-%d")
     return matches_data | {today: []}

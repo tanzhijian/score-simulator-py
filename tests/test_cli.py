@@ -5,14 +5,14 @@ from typer.testing import CliRunner
 
 from score_simulator_py.cli import app
 from score_simulator_py.models import Matches
-from score_simulator_py.types import MatchesType
+from score_simulator_py.types import MatchesTypes
 
 runner = CliRunner()
 
 
 @pytest.fixture(scope="module")
 def env(
-    matches: Matches, today_matches_data: MatchesType
+    matches: Matches, today_matches_data: MatchesTypes
 ) -> Generator[None, Any, None]:
     matches.save(today_matches_data)
     yield
@@ -30,4 +30,9 @@ def test_version() -> None:
 
 def test_play(env: Any) -> None:
     result = runner.invoke(app, ["play"])
+    assert result.exit_code == 0
+
+
+def test_play_100(env: Any) -> None:
+    result = runner.invoke(app, ["play_100", "--steps=2"])
     assert result.exit_code == 0
