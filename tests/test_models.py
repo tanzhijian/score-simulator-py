@@ -193,3 +193,8 @@ class TestMatches:
 
         today = list(today_matches_data.keys())[1]
         assert len(data[today]) == 0
+
+    def test_select(self, matches: Matches) -> None:
+        selected = matches.select(date="2023-12-08", matches=matches_data)
+        match = selected[0]
+        assert match["home"]["name"] == "Juventus"

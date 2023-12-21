@@ -215,6 +215,5 @@ class Matches:
             self.save(data)
         return data
 
-    def select(self, date: str) -> list[MatchTypes]:
-        data = self.get()
-        return data[date]
+    def select(self, date: str, matches: MatchesTypes) -> list[MatchTypes]:
+        return matches[date]

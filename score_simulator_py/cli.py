@@ -19,7 +19,8 @@ def play(date: Optional[str] = None) -> None:
     if date is None:
         date = datelib.today().strftime("%Y-%m-%d")
     matches = Matches()
-    for match in matches.select(date):
+    data = matches.get()
+    for match in matches.select(date, data):
         game = Game(match)
         result = game.play()
 
@@ -37,7 +38,8 @@ def play_100(date: Optional[str] = None, steps: int = 100) -> None:
     if date is None:
         date = datelib.today().strftime("%Y-%m-%d")
     matches = Matches()
-    for match in matches.select(date):
+    data = matches.get()
+    for match in matches.select(date, data):
         game = Game(match)
         result = game.play_100(steps=steps)
 
