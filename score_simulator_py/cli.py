@@ -3,8 +3,7 @@ from typing import Optional
 
 import typer
 
-from .api import Game
-from .models import Matches
+from .api import Game, Matches
 
 app = typer.Typer()
 

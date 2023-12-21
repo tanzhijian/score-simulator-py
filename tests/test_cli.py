@@ -3,8 +3,8 @@ from typing import Any, Generator
 import pytest
 from typer.testing import CliRunner
 
+from score_simulator_py.api import Matches
 from score_simulator_py.cli import app
-from score_simulator_py.models import Matches
 from score_simulator_py.types import MatchesTypes
 
 runner = CliRunner()

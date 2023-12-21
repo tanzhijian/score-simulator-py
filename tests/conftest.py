@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from score_simulator_py.models import Matches
+from score_simulator_py.api import Matches
 from score_simulator_py.types import MatchesTypes
 
 from .data import matches as matches_data
