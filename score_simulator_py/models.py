@@ -12,10 +12,7 @@ class ResultTeam:
 
     @property
     def goal_log(self) -> str:
-        log = ""
-        for minute in self.goal_minutes:
-            log += f"{minute}', "
-        return log
+        return ", ".join([f"{minute}'" for minute in self.goal_minutes])
 
     def reset(self) -> None:
         self.shots = 0

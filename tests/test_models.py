@@ -5,8 +5,8 @@ from score_simulator_py.models import Result, ResultTeam
 
 def test_result_team() -> None:
     team = ResultTeam(name="Arsenal")
-    team.goal_minutes.append(9)
-    assert team.goal_log == "9', "
+    team.goal_minutes += [9, 49]
+    assert team.goal_log == "9', 49'"
 
     team.reset()
     assert len(team.goal_minutes) == 0
