@@ -1,11 +1,12 @@
 import json
 import math
+import os
 import random
 from datetime import date as datelib
 from pathlib import Path
 
 import httpx
-from decouple import config
+from dotenv import get_key
 
 from .models import Frame, FrameTeam, Result, ResultTeam
 from .types import MatchesTypes, MatchTypes
@@ -20,12 +21,16 @@ class Matches:
     def __init__(self) -> None:
         self._path: str | None = None
 
+    def config(self, key: str, env_file: str = ".env") -> str | None:
+        if (value := get_key(env_file, key)) is None:
+            value = os.getenv(key)
+        return value
+
     @property
     def path(self) -> str | None:
         if self._path is not None:
             return self._path
-        setting_path: str | None = config("SCORE_SIMULATOR_DATA", default=None)
-        return setting_path
+        return self.config("SCORE_SIMULATOR_DATA")
 
     @path.setter
     def path(self, value: str) -> None:
@@ -49,7 +54,7 @@ class Matches:
         return Path(self.directory, "matches.json")
 
     def fetch(self) -> MatchesTypes:
-        proxy: str | None = config("SCORE_SIMULATOR_PROXY", default=None)
+        proxy = self.config("SCORE_SIMULATOR_PROXY")
         response = httpx.get(MATCHES_URL, proxies=proxy)
         response.raise_for_status()
         data: MatchesTypes = response.json()

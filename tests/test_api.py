@@ -29,20 +29,47 @@ class TestMatches:
         if matches.directory.exists():
             matches.directory.rmdir()
 
-    def test_default_path(self) -> None:
+    @pytest.fixture
+    def dot_env_config(self) -> Generator[None, Any, None]:
+        env_file = Path(Path.cwd(), ".env.test")
+        with open(env_file, "w") as f:
+            f.write("FOO=foo")
+        yield
+        env_file.unlink()
+
+    @pytest.fixture
+    def os_env_config(self) -> Generator[None, Any, None]:
+        os.environ["SCORE_SIMULATOR_DATA"] = str(Path(Path.cwd(), "tests/tmp"))
+        yield
+        del os.environ["SCORE_SIMULATOR_DATA"]
+
+    def test_config_in_dotenv(
+        self, matches: Matches, dot_env_config: Any
+    ) -> None:
+        foo = matches.config("FOO", ".env.test")
+        assert foo == "foo"
+
+    def test_config_in_os_env(
+        self, matches: Matches, os_env_config: Any
+    ) -> None:
+        path = matches.config("SCORE_SIMULATOR_DATA")
+        assert path == str(Path(Path.cwd(), "tests/tmp"))
+
+    def test_config_none(self, matches: Matches) -> None:
+        assert matches.config("FOO") is None
+
+    def test_path_default(self) -> None:
         matches = Matches()
         assert matches.path is None
 
-    def test_path_include_env(self) -> None:
-        os.environ["SCORE_SIMULATOR_DATA"] = str(Path(Path.cwd(), "tests/tmp"))
+    def test_path_include_os_env(self, os_env_config: Any) -> None:
         matches = Matches()
         assert matches.path == str(Path(Path.cwd(), "tests/tmp"))
-        del os.environ["SCORE_SIMULATOR_DATA"]
 
     def test_path_setter(self, matches: Matches) -> None:
         assert matches.path == str(Path(Path.cwd(), "tests/tmp"))
 
-    def test_default_dir(self) -> None:
+    def test_dir_default(self) -> None:
         matches = Matches()
         directory = matches.directory
         assert str(directory) == str(Path(Path.home(), "score-simulator-data"))
