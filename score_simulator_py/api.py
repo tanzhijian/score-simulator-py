@@ -8,7 +8,7 @@ from pathlib import Path
 import httpx
 from dotenv import get_key
 
-from .models import Frame, FrameTeam, Result, ResultTeam
+from .models import Result, ResultTeam, Step, StepTeam
 from .types import MatchesTypes, MatchTypes
 
 MATCHES_URL = (
@@ -108,8 +108,8 @@ class Game:
 
         return xg
 
-    def attack(self) -> Frame:
-        frame = Frame(home=FrameTeam(), away=FrameTeam())
+    def attack(self) -> Step:
+        step = Step(home=StepTeam(), away=StepTeam())
 
         home_xg_per_shot = (
             self.match["home"]["xg"] / self.match["home"]["shots"]
@@ -131,16 +131,16 @@ class Game:
 
         if random.random() < shot_prob_per_minute:
             if random.random() < home_shot_percentage:
-                frame.home.shot = True
-                frame.home.xg = self.generate_xg(home_xg_per_shot)
+                step.home.shot = True
+                step.home.xg = self.generate_xg(home_xg_per_shot)
                 if random.random() < home_xg_per_shot:
-                    frame.home.score = True
+                    step.home.score = True
             else:
-                frame.away.shot = True
-                frame.away.xg = self.generate_xg(away_xg_per_shot)
+                step.away.shot = True
+                step.away.xg = self.generate_xg(away_xg_per_shot)
                 if random.random() < away_xg_per_shot:
-                    frame.away.score = True
-        return frame
+                    step.away.score = True
+        return step
 
     def play(self, fulltime: int = 90) -> Result:
         result = Result(
@@ -150,17 +150,17 @@ class Game:
         )
 
         for minute in range(fulltime):
-            frame = self.attack()
-            result.home.shots += frame.home.shot
-            result.home.xg += frame.home.xg
-            result.home.score += frame.home.score
-            result.away.shots += frame.away.shot
-            result.away.xg += frame.away.xg
-            result.away.score += frame.away.score
+            step = self.attack()
+            result.home.shots += step.home.shot
+            result.home.xg += step.home.xg
+            result.home.score += step.home.score
+            result.away.shots += step.away.shot
+            result.away.xg += step.away.xg
+            result.away.score += step.away.score
 
-            if frame.home.score:
+            if step.home.score:
                 result.home.goal_minutes.append(minute)
-            elif frame.away.score:
+            elif step.away.score:
                 result.away.goal_minutes.append(minute)
 
         result.timing = fulltime

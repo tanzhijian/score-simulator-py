@@ -123,13 +123,13 @@ class Result:
 
 
 @dataclass
-class FrameTeam:
+class StepTeam:
     shot: bool = False
     score: bool = False
     xg: float = 0
 
 
 @dataclass
-class Frame:
-    home: FrameTeam
-    away: FrameTeam
+class Step:
+    home: StepTeam
+    away: StepTeam
